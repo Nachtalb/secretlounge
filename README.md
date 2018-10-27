@@ -8,11 +8,9 @@ _a bot to make an anonymous group chat on telegram, powered by [coffea](https://
 
 **[/b/ BETA](https://telegram.me/secretloungebot)** ~ random (nsfw)
 
-**[/de/ BETA](https://telegram.me/germanloungebot)** ~ german chat (sfw)
-
 **[/bier/ BETA](https://telegram.me/bierloungebot)** ~ german nsfw chat (nsfw)
 
-**[/gen/ BETA](https://telegram.me/generalloungebot)** ~ general chat (sfw) 
+**Not maintained:** This project is not maintained anymore, please use https://github.com/sfan5/secretlounge-ng instead.
 
 ## Setup
 
