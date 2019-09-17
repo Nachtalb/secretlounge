@@ -25,7 +25,7 @@ import {
 import {
   getUser, getUsers, setRank, isActive, addUser, rejoinUser, updateUser, delUser,
   getSystemConfig, rmWarning, addKarma, karmaOptedOut, addUserSource, delUserSource,
-  getUserSource, getUserSources
+  getUserSource, getUserSources, setLeft
 } from './db'
 import commands from './commands'
 import { HOURS } from './time'
@@ -366,4 +366,19 @@ networks.on('message', (evt, reply) => {
 
   updateUserFromEvent(evt)
   showChangelog(evt, reply)
+})
+
+networks.on('left_chat_member', (evt, reply) => {
+  log('User left a chat: %o', evt)
+
+  const user = getUser(evt.user)
+
+  inUserSource(evt.user).then((ok) => {
+    if (!user || user.left || ok) return
+    let message = cursive('You left the chat because you left all affiliated groups / channels, to rejoin you can use /start!')
+    message.chat = user.id
+    networks.send(message)
+
+    setLeft(user.id, new Date().getTime())
+  })
 })
