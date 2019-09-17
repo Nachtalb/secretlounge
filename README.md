@@ -1,16 +1,14 @@
-# secretlounge
+# group/channel based secretlounge
 
-_a bot to make an anonymous group chat on telegram, powered by [coffea](https://github.com/caffeinery/coffea)_
+_a bot to make an anonymous group chat in affiliation with channels / groups on telegram, powered by [coffea](https://github.com/caffeinery/coffea)_
 
-![https://i.imgur.com/m8V75N9.png](http://i.imgur.com/GJbHrqO.png)
+## Extension of [secretlounge](https://github.com/6697/secretlounge)
 
-**[/a/ BETA](https://telegram.me/animeloungebot)** ~ japan / anime related chat (nsfw)
-
-**[/b/ BETA](https://telegram.me/secretloungebot)** ~ random (nsfw)
-
-**[/bier/ BETA](https://telegram.me/bierloungebot)** ~ german nsfw chat (nsfw)
-
-**Not maintained:** This project is not maintained anymore, please use https://github.com/sfan5/secretlounge-ng instead.
+When this bot is added to a group or channel and registered with `/register` only
+users from this group / channel can join the bot. Users which leave the affiliated
+groups / channels are automatically removed from this bot. In groups and channels
+this bot does not need any admin rights except for maybe posting messages so the
+bot can send a confirmation message.
 
 ## Setup
 
