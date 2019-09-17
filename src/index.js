@@ -355,7 +355,7 @@ networks.on('command', (evt, reply) => {
 
   if (evt && evt.cmd === 'start') {
     inUserSource(evt.user).then((ok) => {
-      if (!ok) return reply(cursive(USER_CANNOT_JOIN_DUE_AFFILIATION ))
+      if (!ok) return reply(cursive(USER_CANNOT_JOIN_DUE_AFFILIATION))
 
       if (isActive(user)) return reply(cursive(USER_IN_CHAT))
       else if (!user) addUser(evt.user)
