@@ -273,6 +273,16 @@ const handleKarma = (evt, reply) => {
   }
 }
 
+const leaveWithMessage = (user, text) => {
+  if (!user || user.left) return
+
+  let message = cursive(text)
+  message.chat = user.id
+  networks.send(message)
+
+  setLeft(user.id, new Date().getTime())
+}
+
 const handleSourceRegistration = (evt, reply) => {
   log('Register user source')
   if (!getUserSource(evt.chat)) {
@@ -288,6 +298,16 @@ const handleSourceRemoval = (evt, reply) => {
   if (!getUserSource(evt.chat)) reply(cursive('User source not registered'))
   else {
     delUserSource(evt.chat)
+
+    getUsers().map((user) => {
+      inUserSource(user.id).then((ok) => {
+        if (ok) return
+        leaveWithMessage(user, 'The affiliated channel / group you are joined removed ' +
+          'their affiliation with this chat bot. Because you are not a member of any' +
+          ' otehr affiliated channel / group you were removed from this chat.')
+      })
+    })
+
     reply(cursive('User source removed'))
   }
 }
@@ -375,10 +395,6 @@ networks.on('left_chat_member', (evt, reply) => {
 
   inUserSource(evt.user).then((ok) => {
     if (!user || user.left || ok) return
-    let message = cursive('You left the chat because you left all affiliated groups / channels, to rejoin you can use /start!')
-    message.chat = user.id
-    networks.send(message)
-
-    setLeft(user.id, new Date().getTime())
+    leaveWithMessage(user, 'You left the chat because you left all affiliated groups / channels, to rejoin you can use /start!')
   })
 })
