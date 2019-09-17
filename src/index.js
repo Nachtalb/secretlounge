@@ -25,7 +25,7 @@ import {
 import {
   getUser, getUsers, setRank, isActive, addUser, rejoinUser, updateUser, delUser,
   getSystemConfig, rmWarning, addKarma, karmaOptedOut, addUserSource, delUserSource,
-  getUserSource
+  getUserSource, getUserSources
 } from './db'
 import commands from './commands'
 import { HOURS } from './time'
@@ -292,6 +292,23 @@ const handleSourceRemoval = (evt, reply) => {
   }
 }
 
+async function inUserSource (user) {
+  log('Check user sources for user: %d', user)
+
+  const sources = getUserSources()
+  if (!sources) return true
+
+  for (const source of sources) {
+    const promises = networks.send({type: 'getChatMember', userId: user, chat: source.id})
+    const ok = await promises[0].then((msg) => {
+      if (msg.status === 'member' || msg.status === 'administrator' || msg.status === 'owner') return true
+    })
+
+    if (ok) return true
+  }
+  return false
+}
+
 networks.on('command', (evt, reply) => {
   log('received command event: %o', evt)
 
@@ -299,7 +316,7 @@ networks.on('command', (evt, reply) => {
 
   if (
     evt &&
-    user.rank >= RANKS.admin &&
+    user && user.rank >= RANKS.admin &&
     (evt.cmd === 'register' || evt.cmd === 'remove') &&
     (evt.raw.chat.type === 'group' || evt.raw.chat.type === 'supergroup')
   ) {
@@ -313,19 +330,23 @@ networks.on('command', (evt, reply) => {
   if (user && user.rank < 0) return reply(cursive(blacklisted(user && user.reason)))
 
   if (evt && evt.cmd === 'start') {
-    if (isActive(user)) return reply(cursive(USER_IN_CHAT))
-    else if (!user) addUser(evt.user)
-    else rejoinUser(evt.user)
+    inUserSource(evt.user).then((ok) => {
+      if (!ok) return reply(cursive('You have to be a member in one of the connected channels/groups'))
 
-    reply(cursive('You joined the chat!'))
+      if (isActive(user)) return reply(cursive(USER_IN_CHAT))
+      else if (!user) addUser(evt.user)
+      else rejoinUser(evt.user)
 
-    const newUser = updateUserFromEvent(evt)
+      reply(cursive('You joined the chat!'))
 
-    // make first user admin
-    if (getUsers().length === 1) setRank(evt.user, RANKS.admin)
+      const newUser = updateUserFromEvent(evt)
 
-    const motd = getSystemConfig().motd
-    if (motd) reply(cursive(motd))
+      // make first user admin
+      if (getUsers().length === 1) setRank(evt.user, RANKS.admin)
+
+      const motd = getSystemConfig().motd
+      if (motd) reply(cursive(motd))
+    })
   } else if (evt && evt.cmd === '+1') {
     handleKarma(evt, reply)
   } else {
