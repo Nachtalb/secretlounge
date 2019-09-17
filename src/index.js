@@ -322,6 +322,9 @@ async function inUserSource (user) {
     const promises = networks.send({type: 'getChatMember', userId: user, chat: source.id})
     const ok = await promises[0].then((msg) => {
       if (msg.status === 'member' || msg.status === 'administrator' || msg.status === 'owner') return true
+    }).catch((err) => {
+      log(err)
+      return false
     })
 
     if (ok) return true
