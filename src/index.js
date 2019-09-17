@@ -15,7 +15,9 @@ import {
   stringifyTimestamp, blacklisted,
   USER_NOT_IN_CHAT, USER_IN_CHAT, USER_BANNED_FROM_CHAT, USER_JOINED_CHAT,
   USER_SPAMMING, ERR_NO_REPLY, ALREADY_UPVOTED, CANT_UPVOTE_OWN_MESSAGE,
-  KARMA_THANK_YOU, YOU_HAVE_KARMA, REJOINING_QUICKLY
+  KARMA_THANK_YOU, YOU_HAVE_KARMA, REJOINING_QUICKLY, NOT_AFFILIATION, ALREADY_AFFILIATION,
+  AFFILIATION_ADDED, AFFILIATION_REMOVED, USER_REMOVED_DUE_AFFILIATION_CHANGE,
+  USER_REMOVED_DUE_AFFILIATION_LEAVE, USER_CANNOT_JOIN_DUE_AFFILIATION
 } from './messages'
 import { RANKS } from './ranks'
 import {
@@ -149,7 +151,7 @@ export const sendToAdmins = (rawEvent) =>
 
 const relay = (type) => {
   networks.on(type, (evt, reply) => {
-    if (evt && evt.raw.chat.type === 'group') return
+    if (evt && (evt.raw.chat.type === 'group' || evt.raw.chat.type === 'supergroup')) return
 
     const user = getUser(evt.user)
     if (user && user.rank < 0) return reply(cursive(blacklisted(user && user.reason)))
@@ -287,28 +289,26 @@ const handleSourceRegistration = (evt, reply) => {
   log('Register user source')
   if (!getUserSource(evt.chat)) {
     addUserSource(evt.chat)
-    reply(cursive('User source added'))
+    reply(cursive(AFFILIATION_ADDED))
   } else {
-    reply(cursive('User source already added'))
+    reply(cursive(ALREADY_AFFILIATION))
   }
 }
 
 const handleSourceRemoval = (evt, reply) => {
   log('Remove user source')
-  if (!getUserSource(evt.chat)) reply(cursive('User source not registered'))
+  if (!getUserSource(evt.chat)) reply(cursive(NOT_AFFILIATION))
   else {
     delUserSource(evt.chat)
 
     getUsers().map((user) => {
       inUserSource(user.id).then((ok) => {
         if (ok) return
-        leaveWithMessage(user, 'The affiliated channel / group you are joined removed ' +
-          'their affiliation with this chat bot. Because you are not a member of any' +
-          ' otehr affiliated channel / group you were removed from this chat.')
+        leaveWithMessage(user, USER_REMOVED_DUE_AFFILIATION_CHANGE)
       })
     })
 
-    reply(cursive('User source removed'))
+    reply(cursive(AFFILIATION_REMOVED))
   }
 }
 
@@ -354,7 +354,7 @@ networks.on('command', (evt, reply) => {
 
   if (evt && evt.cmd === 'start') {
     inUserSource(evt.user).then((ok) => {
-      if (!ok) return reply(cursive('You have to be a member in one of the connected channels/groups'))
+      if (!ok) return reply(cursive(USER_CANNOT_JOIN_DUE_AFFILIATION ))
 
       if (isActive(user)) return reply(cursive(USER_IN_CHAT))
       else if (!user) addUser(evt.user)
@@ -380,12 +380,12 @@ networks.on('command', (evt, reply) => {
 })
 
 networks.on('channel_post', (evt, reply) => {
-  if (evt && evt.text === 'register') handleSourceRegistration(evt, reply)
-  if (evt && evt.text === 'remove') handleSourceRemoval(evt, reply)
+  if (evt && evt.text === '/register') handleSourceRegistration(evt, reply)
+  if (evt && evt.text === '/remove') handleSourceRemoval(evt, reply)
 })
 
 networks.on('message', (evt, reply) => {
-  if (evt && evt.raw.chat.type === 'group') return
+  if (evt && (evt.raw.chat.type === 'group' || evt.raw.chat.type === 'supergroup')) return
 
   updateUserFromEvent(evt)
   showChangelog(evt, reply)
@@ -398,6 +398,6 @@ networks.on('left_chat_member', (evt, reply) => {
 
   inUserSource(evt.user).then((ok) => {
     if (!user || user.left || ok) return
-    leaveWithMessage(user, 'You left the chat because you left all affiliated groups / channels, to rejoin you can use /start!')
+    leaveWithMessage(user, USER_REMOVED_DUE_AFFILIATION_LEAVE)
   })
 })

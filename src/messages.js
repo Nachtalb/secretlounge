@@ -13,6 +13,16 @@ export const USER_SPAMMING = 'avoid sending messages too fast. your message has 
 export const ALREADY_WARNED = 'a warning has already been issued for this message'
 export const MESSAGE_DISAPPEARED = 'this message disappeared into the ether'
 
+export const NOT_AFFILIATION = 'This group / channel is not affiliated with this bot yet'
+export const ALREADY_AFFILIATION = 'This group / channel is already affiliated with this bot'
+export const AFFILIATION_REMOVED = 'Affiliation with this group / channe was removed'
+export const AFFILIATION_ADDED = 'Affiliation with this group / channel was set'
+export const USER_CANNOT_JOIN_DUE_AFFILIATION = 'You have to be a member in one of the affiliated channels / groups'
+export const USER_REMOVED_DUE_AFFILIATION_CHANGE ='The affiliated channel / group you are joined removed ' +
+  'their affiliation with this chat bot. Because you are not a member of any' +
+  ' otehr affiliated channel / group you were removed from this chat.'
+export const USER_REMOVED_DUE_AFFILIATION_LEAVE = 'You left the chat because you left all affiliated groups / channels, to rejoin you can use /start!'
+
 export const blacklisted = (reason) => `you've been blacklisted for ${reason || '(reason not specified)'}`
 export const handedCooldown = (duration, deleted = false) =>
   `you've been handed a cooldown of ${formatTime(duration)} for this message ${deleted ? '(message also deleted)' : ''}`
