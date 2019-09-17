@@ -3,7 +3,7 @@ const db = low('db.json')
 
 import { version } from '../package.json'
 
-db.defaults({ users: [], system: {} }).value()
+db.defaults({ users: [], system: { users_sources: [] } }).value()
 
 export const getKarma = (id) => {
   const user = getUser(id)
@@ -75,3 +75,6 @@ export const karmaOptedOut = (id) => getUser(id).hideKarma || false
 
 export const getSystemConfig = () => db.get('system').value()
 export const setMotd = (motd) => db.get('system').assign({ motd }).value()
+export const addUserSource = (id) => db.get('system.users_sources').push({ id }).value()
+export const delUserSource = (id) => db.get('system.users_sources').remove({ id }).value()
+export const getUserSource = (id) => db.get('system.users_sources').find({ id }).value()

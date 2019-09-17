@@ -24,7 +24,8 @@ import {
 } from './cache'
 import {
   getUser, getUsers, setRank, isActive, addUser, rejoinUser, updateUser, delUser,
-  getSystemConfig, rmWarning, addKarma, karmaOptedOut
+  getSystemConfig, rmWarning, addKarma, karmaOptedOut, addUserSource, delUserSource,
+  getUserSource
 } from './db'
 import commands from './commands'
 import { HOURS } from './time'
@@ -272,11 +273,42 @@ const handleKarma = (evt, reply) => {
   }
 }
 
+const handleSourceRegistration = (evt, reply) => {
+  log('Register user source')
+  if (!getUserSource(evt.chat)) {
+    addUserSource(evt.chat)
+    reply(cursive('User source added'))
+  } else {
+    reply(cursive('User source already added'))
+  }
+}
+
+const handleSourceRemoval = (evt, reply) => {
+  log('Remove user source')
+  if (!getUserSource(evt.chat)) reply(cursive('User source not registered'))
+  else {
+    delUserSource(evt.chat)
+    reply(cursive('User source removed'))
+  }
+}
+
 networks.on('command', (evt, reply) => {
-  if (evt && evt.raw.chat.type === 'group') return
   log('received command event: %o', evt)
 
   const user = getUser(evt.user)
+
+  if (
+    evt &&
+    user.rank >= RANKS.admin &&
+    (evt.cmd === 'register' || evt.cmd === 'remove') &&
+    (evt.raw.chat.type === 'group' || evt.raw.chat.type === 'supergroup')
+  ) {
+    if (evt && evt.cmd === 'register') handleSourceRegistration(evt, reply)
+    if (evt && evt.cmd === 'remove') handleSourceRemoval(evt, reply)
+  }
+
+  if (evt && (evt.raw.chat.type === 'group' || evt.raw.chat.type === 'supergroup')) return
+
   if (evt && evt.cmd) evt.cmd = evt.cmd.toLowerCase()
   if (user && user.rank < 0) return reply(cursive(blacklisted(user && user.reason)))
 
@@ -301,6 +333,11 @@ networks.on('command', (evt, reply) => {
 
     commands(user, evt, reply)
   }
+})
+
+networks.on('channel_post', (evt, reply) => {
+  if (evt && evt.text === 'register') handleSourceRegistration(evt, reply)
+  if (evt && evt.text === 'remove') handleSourceRemoval(evt, reply)
 })
 
 networks.on('message', (evt, reply) => {
