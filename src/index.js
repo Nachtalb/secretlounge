@@ -316,7 +316,8 @@ async function inUserSource (user) {
   log('Check user sources for user: %d', user)
 
   const sources = getUserSources()
-  if (!sources) return true
+
+  if (sources.length == 0) return true
 
   for (const source of sources) {
     const promises = networks.send({type: 'getChatMember', userId: user, chat: source.id})
