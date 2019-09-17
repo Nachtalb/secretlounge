@@ -34,7 +34,12 @@ export default function userCommands (user, evt, reply) {
   /admin [username] - grant a user admin rank
 
 <i>or reply to the message and use:</i>
-  /blacklist [reason] - blacklist the user who posted this message`))
+  /blacklist [reason] - blacklist the user who posted this message
+
+<i>Group affiliation</i>
+Register this bot in one or more channels / groups to make sure only users from that group / channel can join the this bot. The join restriction is only active as long as the bot is affiliated with at least one channe / group. In channels / groups the bot need post permission so you can get a confirmation.
+  /register - registers the current group / channel with this bot
+  /remove - remove affiliation with this bot`))
       break
 
     case 'stop':
