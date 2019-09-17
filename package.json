@@ -53,8 +53,8 @@
     "rimraf": "^2.5.2"
   },
   "dependencies": {
-    "coffea": "1.0.0-beta18",
-    "coffea-telegram": "^1.0.0-beta9-6",
+    "coffea": "^1.0.0-beta18",
+    "coffea-telegram": "^1.0.0-beta9-9",
     "debug-dude": "^1.0.3",
     "lowdb": "^0.13.1"
   }
