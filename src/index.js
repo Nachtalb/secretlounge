@@ -148,6 +148,8 @@ export const sendToAdmins = (rawEvent) =>
 
 const relay = (type) => {
   networks.on(type, (evt, reply) => {
+    if (evt && evt.raw.chat.type === 'group') return
+
     const user = getUser(evt.user)
     if (user && user.rank < 0) return reply(cursive(blacklisted(user && user.reason)))
 
@@ -271,6 +273,7 @@ const handleKarma = (evt, reply) => {
 }
 
 networks.on('command', (evt, reply) => {
+  if (evt && evt.raw.chat.type === 'group') return
   log('received command event: %o', evt)
 
   const user = getUser(evt.user)
@@ -301,6 +304,8 @@ networks.on('command', (evt, reply) => {
 })
 
 networks.on('message', (evt, reply) => {
+  if (evt && evt.raw.chat.type === 'group') return
+
   updateUserFromEvent(evt)
   showChangelog(evt, reply)
 })
